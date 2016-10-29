@@ -1,4 +1,4 @@
-CyanogenMod 13 device configuration for [LG K7 LGMS330](http://www.modaco.com/forums/topic/376952-cyanogenmod-13/).
+CyanogenMod 13 device configuration for [LG K7 LGMS330](http://www.gsmarena.com/lg_k7-7848.php).
 
 How to build:
 -------------
@@ -6,10 +6,8 @@ How to build:
 Initialize repo:
 
     repo init -u git://github.com/CyanogenMod/android.git -b cm-13.0
-    curl --create-dirs -L -o .repo/local_manifests/manifest_huawei_y560.xml -O -L https://raw.githubusercontent.com/legaCyMod/android_local_manifest/cm-13.0/manifest_huawei_y560.xml
-    repo sync
+    Soon.
 
 Compile:
 
-    . build/envsetup.sh
-    brunch y560
+    Soon.
