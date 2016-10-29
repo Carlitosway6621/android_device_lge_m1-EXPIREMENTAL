@@ -27,6 +27,7 @@
 #
 
 target=`getprop ro.board.platform`
+factory=`getprop ro.factorytest`
 case "$target" in
     "msm7201a_ffa" | "msm7201a_surf" | "msm7627_ffa" | "msm7627_6x" | "msm7627a"  | "msm7627_surf" | \
     "qsd8250_surf" | "qsd8250_ffa" | "msm7630_surf" | "msm7630_1x" | "msm7630_fusion" | "qsd8650a_st1x")
@@ -527,11 +528,11 @@ case "$target" in
                 echo 3 > /proc/sys/kernel/sched_ravg_hist_size
 
                 # HMP Task packing settings for 8916
-                echo 30 > /proc/sys/kernel/sched_small_task
-                echo 50 > /sys/devices/system/cpu/cpu0/sched_mostly_idle_load
-                echo 50 > /sys/devices/system/cpu/cpu1/sched_mostly_idle_load
-                echo 50 > /sys/devices/system/cpu/cpu2/sched_mostly_idle_load
-                echo 50 > /sys/devices/system/cpu/cpu3/sched_mostly_idle_load
+                echo 20 > /proc/sys/kernel/sched_small_task
+                echo 30 > /sys/devices/system/cpu/cpu0/sched_mostly_idle_load
+                echo 30 > /sys/devices/system/cpu/cpu1/sched_mostly_idle_load
+                echo 30 > /sys/devices/system/cpu/cpu2/sched_mostly_idle_load
+                echo 30 > /sys/devices/system/cpu/cpu3/sched_mostly_idle_load
                 echo 3 > /sys/devices/system/cpu/cpu0/sched_mostly_idle_nr_run
                 echo 3 > /sys/devices/system/cpu/cpu1/sched_mostly_idle_nr_run
                 echo 3 > /sys/devices/system/cpu/cpu2/sched_mostly_idle_nr_run
@@ -910,15 +911,17 @@ case "$target" in
 	echo 1 > /sys/devices/system/cpu/cpu3/online
 	echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
 
-	# Enable core control
-	insmod /system/lib/modules/core_ctl.ko
-	echo 2 > /sys/devices/system/cpu/cpu0/core_ctl/min_cpus
-        max_freq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq`
-        min_freq=800000
-        echo $((min_freq*100 / max_freq)) $((min_freq*100 / max_freq)) $((66*1000000 / max_freq)) \
-	$((55*1000000 / max_freq)) > /sys/devices/system/cpu/cpu0/core_ctl/busy_up_thres
-        echo $((33*1000000 / max_freq)) > /sys/devices/system/cpu/cpu0/core_ctl/busy_down_thres
-	echo 100 > /sys/devices/system/cpu/cpu0/core_ctl/offline_delay_ms
+	if [ "1" != "$factory" ]; then
+		# Enable core control
+		insmod /system/lib/modules/core_ctl.ko
+		echo 2 > /sys/devices/system/cpu/cpu0/core_ctl/min_cpus
+		max_freq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq`
+		min_freq=800000
+		echo $((min_freq*100 / max_freq)) $((min_freq*100 / max_freq)) $((66*1000000 / max_freq)) \
+			$((55*1000000 / max_freq)) > /sys/devices/system/cpu/cpu0/core_ctl/busy_up_thres
+		echo $((33*1000000 / max_freq)) > /sys/devices/system/cpu/cpu0/core_ctl/busy_down_thres
+		echo 100 > /sys/devices/system/cpu/cpu0/core_ctl/offline_delay_ms
+	fi
 
 
         # Apply governor settings for 8909
@@ -1119,8 +1122,35 @@ case "$target" in
         ;;
 esac
 
-#Set per_process_reclaim tuning parameters
-echo 50 > /sys/module/process_reclaim/parameters/pr_pressure_min
-echo 70 > /sys/module/process_reclaim/parameters/pr_pressure_max
-echo 512 > /sys/module/process_reclaim/parameters/per_swap_size
-echo 30 > /sys/module/process_reclaim/parameters/swap_opt_eff
+# Create native cgroup and move all tasks to it. Allot 15% real-time
+# bandwidth limit to native cgroup (which is what remains after
+# Android uses up 80% real-time bandwidth limit). root cgroup should
+# become empty after all tasks are moved to native cgroup.
+
+CGROUP_ROOT=/dev/cpuctl
+mkdir $CGROUP_ROOT/native
+echo 150000 > $CGROUP_ROOT/native/cpu.rt_runtime_us
+
+# We could be racing with task creation, as a result of which its possible that
+# we may fail to move all tasks from root cgroup to native cgroup in one shot.
+# Retry few times before giving up.
+
+for loop_count in 1 2 3
+do
+	for i in $(cat $CGROUP_ROOT/tasks)
+	do
+		echo $i > $CGROUP_ROOT/native/tasks
+	done
+
+	root_tasks=$(cat $CGROUP_ROOT/tasks)
+	if [ -z "$root_tasks" ]
+	then
+		break
+	fi
+done
+
+# Check if we failed to move all tasks from root cgroup
+if [ ! -z "$root_tasks" ]
+then
+	echo "Error: Could not move all tasks to native cgroup"
+fi
