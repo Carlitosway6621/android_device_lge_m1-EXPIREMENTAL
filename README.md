@@ -1,4 +1,4 @@
-CyanogenMod 13 device configuration for [Huawei Y5](http://www.modaco.com/forums/topic/376952-cyanogenmod-13/).
+CyanogenMod 13 device configuration for [LG K7 LGMS330](http://www.modaco.com/forums/topic/376952-cyanogenmod-13/).
 
 How to build:
 -------------
