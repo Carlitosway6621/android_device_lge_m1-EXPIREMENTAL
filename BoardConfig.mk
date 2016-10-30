@@ -12,91 +12,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 LOCAL_PATH := device/lge/m1
 
 # Platform
-TARGET_NO_BOOTLOADER := true
-
 TARGET_BOARD_PLATFORM := msm8909
-TARGET_BOARD_PLATFORM_GPU := qcom-adreno304
-TARGET_BOOTLOADER_BOARD_NAME := msm8909
 
+# Architecture
 TARGET_ARCH := arm
+TARGET_BOARD_SUFFIX := _32
 TARGET_ARCH_VARIANT := armv7-a-neon
+TARGET_BOARD_PLATFORM_GPU := qcom-adreno304
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a7
-TARGET_CPU_SMP := true
-
-TARGET_GLOBAL_CFLAGS += -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=softfp
-TARGET_GLOBAL_CPPFLAGS += -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=softfp
-
-# Inline kernel building
-BOARD_DTBTOOL_ARGS := --force-v2
-BOARD_KERNEL_BASE := 0x80000000
-BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x3F ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci lpm_levels.sleep_disabled=1 earlyprintk
-BOARD_RAMDISK_OFFSET := 0x01000000
-BOARD_KERNEL_PAGESIZE := 2048
-BOARD_KERNEL_SEPARATED_DT := true
-BOARD_KERNEL_TAGS_OFFSET := 0x00000100
-TARGET_KERNEL_CONFIG := msm8909-lge-eng_defconfig
-TARGET_KERNEL_SOURCE := kernel/lge/m1
-
-# ANT+
-BOARD_ANT_WIRELESS_DEVICE := "qualcomm-smd"
-
-# Audio
-AUDIO_FEATURE_ENABLED_FM := true
-AUDIO_FEATURE_ENABLED_KPI_OPTIMIZE := true
-BOARD_USES_ALSA_AUDIO := true
-
-# Bluetooth
-BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(LOCAL_PATH)/bluetooth
-BOARD_HAVE_BLUETOOTH := true
-BOARD_HAVE_BLUETOOTH_QCOM := true
-BLUETOOTH_HCI_USE_MCT := true
-
-# Build
-TARGET_SYSTEMIMAGE_USE_SQUISHER := true
-
-# Camera
-USE_DEVICE_SPECIFIC_CAMERA := true
-
-# Charger
-BOARD_CHARGER_ENABLE_SUSPEND := true
-BOARD_CHARGER_SHOW_PERCENTAGE := true
-
-# Crypto
-TARGET_HW_DISK_ENCRYPTION := true
-
-# FM radio
-#TARGET_QCOM_NO_FM_FIRMWARE := true
-
-# Graphics
-GET_FRAMEBUFFER_FORMAT_FROM_HWC := true
-MAX_EGL_CACHE_KEY_SIZE := 12*1024
-MAX_EGL_CACHE_SIZE := 2048*1024
-NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
-OVERRIDE_RS_DRIVER := libRSDriver_adreno.so
-TARGET_USES_ION := true
-USE_OPENGL_RENDERER := true
-
-# Hardware tunables framework
-BOARD_HARDWARE_CLASS := $(LOCAL_PATH)/cmhw/
+TARGET_BOOTLOADER_BOARD_NAME := MSM8909
+TARGET_NO_BOOTLOADER := true
 
 # Init
-TARGET_INIT_VENDOR_LIB := libinit_msm
 TARGET_PLATFORM_DEVICE_BASE := /devices/soc.0/
+TARGET_USES_OVERLAY := true
 
-# Lights
-TARGET_PROVIDES_LIBLIGHT := true
+# Qualcomm support
+BOARD_USES_QCOM_HARDWARE := true
+BOARD_USES_QC_TIME_SERVICES := true
+TARGET_POWERHAL_VARIANT := qcom
+TARGET_RIL_VARIANT := caf
 
-# Memory
-MALLOC_IMPL := dlmalloc
+BOARD_ANT_WIRELESS_DEVICE := "vfs-prerelease"
 
-# Partition sizes
+# Partitions
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x02000000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x02000000
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2053531648
@@ -104,12 +49,62 @@ BOARD_USERDATAIMAGE_PARTITION_SIZE := 5065636864 # (5065653248 - 16384)
 BOARD_CACHEIMAGE_PARTITION_SIZE := 268435456
 BOARD_PERSISTIMAGE_PARTITION_SIZE := 33554432
 BOARD_FLASH_BLOCK_SIZE := 131072 # (BOARD_KERNEL_PAGESIZE * 64)
+TARGET_USERIMAGES_USE_EXT4 := true
 
-# Power
-TARGET_POWERHAL_VARIANT := qcom
+# Hardware
+BOARD_HARDWARE_CLASS += hardware/cyanogen/cmhw
+BOARD_USES_CYANOGEN_HARDWARE := true
 
-# QCOM hardware
-BOARD_USES_QCOM_HARDWARE := true
+# Kernel
+BOARD_DTBTOOL_ARGS := --kernel_offset 0x80008000 --ramdisk_offset 0x82000000 --tags_offset 0x80000100 --dt device/lge/m1/dt.img
+BOARD_KERNEL_BASE := 0x80000000
+BOARD_KERNEL_CMDLINE := console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.selinux=permissive androidboot.hardware=qcom msm_rtb.filter=0x237 ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci lpm_levels.sleep_disabled=1
+BOARD_KERNEL_PAGESIZE := 2048
+BOARD_KERNEL_TAGS_OFFSET := 0x00000100
+BOARD_RAMDISK_OFFSET := 0x01000000 
+TARGET_KERNEL_CONFIG := m1_mpcs_us_defconfig
+TARGET_KERNEL_SOURCE := kernel/lge/m1
+TARGET_PREBUILT_KERNEL := device/lge/m1/kernel
+ENABLE_CPUSETS := true
+
+# ANT+
+BOARD_ANT_WIRELESS_DEVICE := "qualcomm-smd"
+
+# Audio
+AUDIO_FEATURE_ENABLED_KPI_OPTIMIZE := true
+AUDIO_FEATURE_ENABLED_NEW_SAMPLE_RATE := true
+BOARD_USES_ALSA_AUDIO := true
+USE_CUSTOM_AUDIO_POLICY := 1
+
+# Bluetooth
+BOARD_HAVE_BLUETOOTH := true
+BOARD_HAVE_BLUETOOTH_QCOM := true
+BLUETOOTH_HCI_USE_MCT := true
+
+# Cypto
+TARGET_HW_DISK_ENCRYPTION := true
+TARGET_KEYMASTER_WAIT_FOR_QSEE := true
+
+# Display
+MAX_EGL_CACHE_KEY_SIZE := 12*1024
+MAX_EGL_CACHE_SIZE := 2048*1024
+
+NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
+
+OVERRIDE_RS_DRIVER := libRSDriver_adreno.so
+
+TARGET_CONTINUOUS_SPLASH_ENABLED := true
+TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS := true
+TARGET_USES_C2D_COMPOSITION := true
+TARGET_USES_ION := true
+USE_OPENGL_RENDERER := true
+
+# FM
+AUDIO_FEATURE_ENABLED_FM_POWER_OPT := true
+TARGET_QCOM_NO_FM_FIRMWARE := true
+
+# Media
+TARGET_HAVE_SIGNED_VENUS_FW := true
 
 # Recovery
 TARGET_RECOVERY_FSTAB := $(LOCAL_PATH)/ramdisk/fstab.qcom
@@ -121,9 +116,10 @@ BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_15x24.h\"
 RECOVERY_GRAPHICS_USE_LINELENGTH := true
 BOARD_SUPPRESS_SECURE_ERASE := true
 BOARD_HAS_NO_SELECT_BUTTON := true
+# TARGET_RECOVERY_UPDATER_LIBS := librecovery_updater_cm
 
 # TWRP
-RECOVERY_VARIAN := twrp
+RECOVERY_VARIANT := twrp
 TW_THEME := portrait_hdpi
 RECOVERY_GRAPHICS_USE_LINELENGTH := true
 TW_INTERNAL_STORAGE_PATH := "/data/media"
@@ -138,32 +134,26 @@ RECOVERY_SDCARD_ON_DATA := true
 BOARD_HAS_NO_REAL_SDCARD := true
 TW_NO_SCREEN_TIMEOUT := true
 
-# SELinux
-include device/qcom/sepolicy/sepolicy.mk
-
-BOARD_SEPOLICY_DIRS += \
-    device/huawei/y560/sepolicy
-
-BOARD_SEPOLICY_UNION += \
-    file_contexts \
-    kernel.te \
-    mediaserver.te \
-    mm-qcamerad.te \
-    property.te \
-    property_contexts \
-    system_server.te
-
-# Vold
-TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/msm_hsusb/gadget/lun1/file
-
 # Wifi
 BOARD_HAS_QCOM_WLAN := true
 BOARD_HAS_QCOM_WLAN_SDK := true
+
 BOARD_HOSTAPD_DRIVER := NL80211
 BOARD_HOSTAPD_PRIVATE_LIB := lib_driver_cmd_qcwcn
+
 BOARD_WLAN_DEVICE := qcwcn
+
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
 BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_qcwcn
-WIFI_DRIVER_MODULE_PATH := "/system/lib/modules/wlan.ko"
-WIFI_DRIVER_MODULE_NAME := "wlan"
+
+TARGET_USES_QCOM_WCNSS_QMI := true
+TARGET_USES_WCNSS_CTRL := true
+
+WIFI_DRIVER_FW_PATH_AP := "ap"
+WIFI_DRIVER_FW_PATH_STA := "sta"
+
 WPA_SUPPLICANT_VERSION := VER_0_8_X
+
+# SEPolicy
+include device/qcom/sepolicy/sepolicy.mk
+BOARD_SEPOLICY_DIRS += device/lge/m1/sepolicy
